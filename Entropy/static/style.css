@@ -1,0 +1,111 @@
+﻿/* -------------------- Reset -------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* -------------------- Body -------------------- */
+body {
+    background: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* -------------------- Header -------------------- */
+header {
+    background: #4A90E2;
+    color: white;
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+header a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+}
+
+header a:hover {
+    text-decoration: underline;
+}
+
+/* -------------------- Container -------------------- */
+.container {
+    width: 90%;
+    max-width: 500px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* -------------------- Forms -------------------- */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+form input {
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: border 0.3s;
+}
+
+form input:focus {
+    border-color: #4A90E2;
+    outline: none;
+}
+
+button {
+    padding: 10px;
+    background: #4A90E2;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #357ABD;
+}
+
+/* -------------------- Messages -------------------- */
+.message {
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* -------------------- Footer -------------------- */
+footer {
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+    color: #555;
+    font-size: 0.9rem;
+}

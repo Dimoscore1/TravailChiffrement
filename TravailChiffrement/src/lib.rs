@@ -21,7 +21,7 @@ pub fn caesar_cipher(text: &str, shift: i32) -> String {
         .collect()
 }
 
-/// Table fixe pour Homophonic Substitution (uniquement majuscules)
+/// Table pour Homophonic Substitution (que les majuscules)
 fn homophonic_table() -> HashMap<char, &'static str> {
     let mut table = HashMap::new();
     table.insert('A', "F");
@@ -53,7 +53,7 @@ fn homophonic_table() -> HashMap<char, &'static str> {
     table
 }
 
-/// Homophonic après César (chiffrement)
+/// Homophonic puis César 
 pub fn caesar_then_homophonic_encrypt(text: &str, shift: i32) -> String {
     let caesar_text = caesar_cipher(text, shift);
     let table = homophonic_table();
@@ -64,7 +64,7 @@ pub fn caesar_then_homophonic_encrypt(text: &str, shift: i32) -> String {
         .collect()
 }
 
-/// Déchiffrement homophonic + César
+/// Déchiffrement homophonic puis César
 pub fn homophonic_then_caesar_decrypt(text: &str, shift: i32) -> String {
     let table = homophonic_table();
     let inverse_table: HashMap<_, _> = table.into_iter().map(|(k, v)| (v, k)).collect();
@@ -87,11 +87,11 @@ pub fn homophonic_then_caesar_decrypt(text: &str, shift: i32) -> String {
         }
     }
 
-    // Appliquer le décalage inverse César
+    // On applique le décalage inverse
     caesar_cipher(&result, -shift)
 }
 
-/// Vigenère encrypt
+/// Vigenère cryptage
 pub fn vigenere_encrypt(text: &str, key: &str) -> String {
     let key = key.to_uppercase();
     let key_bytes = key.as_bytes();
@@ -158,7 +158,7 @@ pub fn remove_accents(text: &str) -> String {
 mod tests {
     use super::*;
 
-    // ----------------- Tests César -----------------
+    // Test de César
     #[test]
     fn test_caesar_lowercase() {
         let text = "Chateau";
@@ -214,7 +214,7 @@ mod tests {
         assert_eq!(decrypted, text.to_uppercase());
     }
 
-    // ----------------- Tests Vigenère -----------------
+    // Tests de Vigenère 
     #[test]
     fn test_vigenere_uppercase() {
         let text = "REMPART";

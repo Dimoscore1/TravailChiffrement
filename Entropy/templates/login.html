@@ -1,0 +1,17 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+        <h1>Connexion</h1>
+        <form method="POST" action="{{ url_for('login') }}">
+            <input type="text" name="prenom" placeholder="Prénom" required>
+            <input type="password" name="mdp" placeholder="Mot de passe" required>
+            <button type="submit">Se connecter</button>
+        </form>
+        <p class="login-link">Pas encore inscrit ? <a href="{{ url_for('register') }}">Inscription</a></p>
+    </div>
+</div>
+{% endblock %}

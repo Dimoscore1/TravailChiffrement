@@ -1,0 +1,27 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<h2>Inscription</h2>
+<form method="POST">
+    <label>Prénom :</label>
+    <input type="text" name="prenom" value="{{ prenom_val }}" required><br>
+
+    <label>Nom :</label>
+    <input type="text" name="nom" value="{{ nom_val }}" required><br>
+
+    <label>Mot de passe :</label>
+    <input type="password" name="mdp" value="{{ mdp_val }}"><br>
+
+    <!-- Bouton calculer l'entropie -->
+    <button type="submit" name="calculer_entropy">
+        Calculer l'entropie
+    </button>
+
+    <!-- Affichage de l'entropie et du niveau -->
+    {% if ent_value != "" %}
+    <p>Entropie : {{ ent_value }} bits ({{ niveau }})</p>
+    {% endif %}
+
+    <br>
+    <button type="submit">S'inscrire</button>
+</form>
+{% endblock %}

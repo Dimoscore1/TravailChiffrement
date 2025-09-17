@@ -1,0 +1,12 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+<div class="home-page">
+    <h1>Bienvenue sur Entropy</h1>
+    <p>Votre application sécurisée pour gérer les utilisateurs et calculer l'entropie des mots de passe.</p>
+    <a class="btn" href="{{ url_for('register') }}">Inscription</a>
+    <a class="btn" href="{{ url_for('login') }}">Connexion</a>
+</div>
+{% endblock %}

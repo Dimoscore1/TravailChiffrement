@@ -28,7 +28,7 @@ fn main() {
     io::stdin().read_line(&mut text).expect("Erreur de lecture");
     let mut text = text.trim().to_string();
 
-    // Normalisation des lettres accentuées
+    // On normalise les lettres
     text = remove_accents(&text);
 
     let result = match choice {
@@ -45,7 +45,7 @@ fn main() {
             }
         }
         "2" => {
-            println!("Entrez la clé de décalage (shift) :");
+            println!("Entrez la clé de décalage  :");
             let mut shift_input = String::new();
             io::stdin().read_line(&mut shift_input).expect("Erreur de lecture");
             let shift: i32 = shift_input.trim().parse().unwrap_or(3);
