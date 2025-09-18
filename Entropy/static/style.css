@@ -6,6 +6,13 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+body, ul, li {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
 /* -------------------- Body -------------------- */
 body {
     background: #f5f7fa;
@@ -15,29 +22,45 @@ body {
 
 /* -------------------- Header -------------------- */
 header {
-    background: #4A90E2;
-    color: white;
-    padding: 1rem 0;
+    width: 100%;
+    position: fixed; /* Toujours en haut */
+    top: 0;
+    left: 0;
+    background-color: #007bff; /* bleu */
+    padding: 10px 0; /* hauteur réduite */
     text-align: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    z-index: 1000;
 }
 
-header a {
-    color: white;
+header nav ul {
+    list-style: none;
+    display: flex;
+    gap: 15px; /* espace entre les liens */
+}
+
+header nav ul li a {
     text-decoration: none;
-    margin: 0 15px;
+    color: #fff; /* texte blanc */
     font-weight: bold;
+    padding: 5px 10px;
+    font-size: 14px;
+    transition: all 0.2s;
+    border-radius: 5px;
 }
 
-header a:hover {
-    text-decoration: underline;
+header nav ul li a:hover {
+    color: #fff;
+    background-color: rgba(0, 123, 255, 0.8);
 }
 
 /* -------------------- Container -------------------- */
 .container {
     width: 90%;
     max-width: 500px;
-    margin: 2rem auto;
+    margin: 100px auto 2rem; /* marge-top ajustée pour le header fixe */
     background: white;
     padding: 2rem;
     border-radius: 10px;
@@ -83,22 +106,38 @@ button:hover {
     background: #357ABD;
 }
 
-/* -------------------- Messages -------------------- */
-.message {
-    padding: 10px;
-    margin-bottom: 1rem;
+/* -------------------- Messages flash -------------------- */
+.flash-messages {
+    list-style: none;
+    margin-bottom: 20px;
+}
+
+.flash-messages li {
+    padding: 8px;
     border-radius: 5px;
+    margin-bottom: 5px;
+    font-size: 14px;
     text-align: center;
 }
 
-.message.success {
-    background: #d4edda;
+.flash-messages .success {
+    background-color: #d4edda;
     color: #155724;
 }
 
-.message.error {
-    background: #f8d7da;
+.flash-messages .danger {
+    background-color: #f8d7da;
     color: #721c24;
+}
+
+.flash-messages .warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.flash-messages .info {
+    background-color: #cce5ff;
+    color: #004085;
 }
 
 /* -------------------- Footer -------------------- */
@@ -108,4 +147,13 @@ footer {
     margin-top: 2rem;
     color: #555;
     font-size: 0.9rem;
+}
+main {
+    margin-top: 20px; /* Décale le contenu vers le bas pour ne pas recouvrir le header */
+    padding: 20px;
+}
+
+/* Si tu utilises .container pour les pages de formulaire */
+.container {
+    margin-top: 100px; /* Décale encore plus si nécessaire */
 }

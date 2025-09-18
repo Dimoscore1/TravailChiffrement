@@ -1,0 +1,8 @@
+﻿secret_key: "ma_cle_secrete_super_longue"
+databases:
+  Postgres:
+    server: "localhost"
+    username: "userbdd"
+    password: "1234"
+    database: "Entropy"
+    port: 5432

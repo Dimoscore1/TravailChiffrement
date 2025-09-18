@@ -9,19 +9,54 @@
     <input type="text" name="nom" value="{{ nom_val }}" required><br>
 
     <label>Mot de passe :</label>
-    <input type="password" name="mdp" value="{{ mdp_val }}"><br>
+    <input type="password" id="mdp" name="mdp" value="{{ mdp_val }}"><br>
 
-    <!-- Bouton calculer l'entropie -->
-    <button type="submit" name="calculer_entropy">
-        Calculer l'entropie
-    </button>
-
-    <!-- Affichage de l'entropie et du niveau -->
-    {% if ent_value != "" %}
-    <p>Entropie : {{ ent_value }} bits ({{ niveau }})</p>
-    {% endif %}
+    <!-- Barre d'entropie -->
+    <div style="margin-top: 10px; width: 300px; height: 20px; background-color: #eee; border-radius: 5px;">
+        <div id="entropyBar" style="height: 100%; width: 0%; border-radius: 5px;"></div>
+    </div>
+    <p id="entropyText"></p>
 
     <br>
     <button type="submit">S'inscrire</button>
 </form>
+
+<script>
+    function calculerEntropy(mdp) {
+        if (!mdp) return 0;
+
+        let pool = 0;
+        if (/[a-z]/.test(mdp)) pool += 26;
+        if (/[A-Z]/.test(mdp)) pool += 26;
+        if (/[0-9]/.test(mdp)) pool += 10;
+        if (/[^a-zA-Z0-9]/.test(mdp)) pool += 32;
+        if (pool === 0) pool = 1;
+
+        return Math.round(Math.log2(Math.pow(pool, mdp.length)));
+    }
+
+    function niveauEntropy(ent) {
+        if (ent < 28) return "Faible";
+        else if (ent < 36) return "Moyen";
+        else return "Fort";
+    }
+
+    const mdpInput = document.getElementById('mdp');
+    const bar = document.getElementById('entropyBar');
+    const text = document.getElementById('entropyText');
+
+    mdpInput.addEventListener('input', () => {
+        const mdp = mdpInput.value;
+        const ent = calculerEntropy(mdp);
+        const niveau = niveauEntropy(ent);
+
+        // Mettre à jour la barre
+        const width = Math.min(ent / 40 * 100, 100);
+        bar.style.width = width + '%';
+        bar.style.backgroundColor = niveau === "Faible" ? 'red' : niveau === "Moyen" ? 'orange' : 'green';
+
+        // Afficher le texte
+        text.textContent = mdp ? `${ent} bits (${niveau})` : '';
+    });
+</script>
 {% endblock %}
