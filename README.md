@@ -32,9 +32,13 @@ Puis 1 et 2 pour chiffrer ou déchiffrer
 Entrer le mot a chiffrer ou à déchiffrer puis la clé de chiffrement
 Test
 Le projet contient des tests pour :
+
 César (chiffrement et déchiffrement)
 Homophonic Substitution (réversible)
 cargo test
 
+Pour lancer les matrices
+ python matrix_operations.py pour tester soi même
+ python test_matrix_operations.py contient des tests préparé 
 
 
