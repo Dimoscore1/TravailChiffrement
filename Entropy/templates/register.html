@@ -17,6 +17,13 @@
     </div>
     <p id="entropyText"></p>
 
+    <!-- Redondance -->
+    <p id="redText"></p>
+
+    <!-- Vérification mot de passe fuité -->
+    <button type="button" id="btnCheckPwned">Vérifier mot de passe fuité</button>
+    <p id="pwnedText"></p>
+
     <br>
     <button type="submit">S'inscrire</button>
 </form>
@@ -24,14 +31,12 @@
 <script>
     function calculerEntropy(mdp) {
         if (!mdp) return 0;
-
         let pool = 0;
         if (/[a-z]/.test(mdp)) pool += 26;
         if (/[A-Z]/.test(mdp)) pool += 26;
         if (/[0-9]/.test(mdp)) pool += 10;
         if (/[^a-zA-Z0-9]/.test(mdp)) pool += 32;
         if (pool === 0) pool = 1;
-
         return Math.round(Math.log2(Math.pow(pool, mdp.length)));
     }
 
@@ -41,22 +46,51 @@
         else return "Fort";
     }
 
+    function calculerRedondance(mdp) {
+        if (!mdp) return {pct:0, bits:0, niveau:"N/A"};
+        let counts = {};
+        for (let c of mdp) counts[c] = (counts[c] || 0) + 1;
+        let total = Object.values(counts).reduce((acc,v)=>acc+Math.max(v-1,0),0);
+        let pct = total/mdp.length*100;
+        let bits = total*4;
+        let niveau = pct<10?"Bien":pct<25?"Moyen":"Faible";
+        return {pct: pct.toFixed(2), bits: bits, niveau:niveau};
+    }
+
     const mdpInput = document.getElementById('mdp');
     const bar = document.getElementById('entropyBar');
     const text = document.getElementById('entropyText');
+    const redText = document.getElementById('redText');
+    const pwnedText = document.getElementById('pwnedText');
 
-    mdpInput.addEventListener('input', () => {
+    mdpInput.addEventListener('input', ()=>{
         const mdp = mdpInput.value;
         const ent = calculerEntropy(mdp);
         const niveau = niveauEntropy(ent);
+        const red = calculerRedondance(mdp);
 
-        // Mettre à jour la barre
-        const width = Math.min(ent / 40 * 100, 100);
-        bar.style.width = width + '%';
-        bar.style.backgroundColor = niveau === "Faible" ? 'red' : niveau === "Moyen" ? 'orange' : 'green';
+        // barre entropie
+        const width = Math.min(ent/40*100,100);
+        bar.style.width = width+"%";
+        bar.style.backgroundColor = niveau==="Faible"?"red":niveau==="Moyen"?"orange":"green";
 
-        // Afficher le texte
-        text.textContent = mdp ? `${ent} bits (${niveau})` : '';
+        text.textContent = mdp?`${ent} bits (${niveau})`:"";
+        redText.textContent = mdp?`Redondance: ${red.pct}% (${red.bits} bits) - ${red.niveau}`:"";
+    });
+
+    // Vérification mot de passe fuité
+    document.getElementById('btnCheckPwned').addEventListener('click', async ()=>{
+        const mdp = mdpInput.value;
+        if (!mdp) {pwnedText.textContent="Mot de passe vide"; return;}
+        const res = await fetch("/check_pwned", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({mdp})
+        });
+        const data = await res.json();
+        if(data.pwned===true) pwnedText.textContent="⚠️ Ce mot de passe a fuité !";
+        else if(data.pwned===false) pwnedText.textContent="✅ Mot de passe sûr";
+        else pwnedText.textContent=data.error;
     });
 </script>
 {% endblock %}

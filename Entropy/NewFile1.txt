@@ -1,3 +1,6 @@
 ﻿ronder.co
 Faire une entropy compliqué
 redondance
+Faire un bouton qui vérifie si y le mot de passe fait pas partie dune list des mots de passe fuité
+Mettre en place des tests
+Faire une API comme swagger

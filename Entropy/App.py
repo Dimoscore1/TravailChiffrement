@@ -1,5 +1,5 @@
-﻿from back.Controller.ApiUser import ApiUser
-from back.Class.CConfig import Config, db
+﻿from back.Class.CConfig import Config, db
+from back.Controller.ApiUser import ApiUser
 
 config = Config()
 app = config.app

@@ -2,7 +2,6 @@
 from flask import session
 from back.Model.Entropy import Entropy
 from back.Class.CConfig import db
-
 class Authentification:
 
     @staticmethod

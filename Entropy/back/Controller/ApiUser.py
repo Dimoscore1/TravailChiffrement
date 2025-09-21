@@ -1,9 +1,13 @@
 ﻿import math
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+import hashlib
+import requests
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from back.Class.Authentification import Authentification
 
 ApiUser = Blueprint("ApiUser", __name__)
 
+# ---------------- Calcul de l'entropie ----------------
 def calculer_entropy(mdp):
     if not mdp:
         return None, None
@@ -27,6 +31,25 @@ def calculer_entropy(mdp):
         niveau = "Fort"
     return ent, niveau
 
+# ---------------- Calcul de la redondance ----------------
+def calculer_redondance(mdp):
+    if not mdp:
+        return {"pct": 0, "bits": 0, "niveau": "N/A"}
+    counts = {}
+    for c in mdp:
+        counts[c] = counts.get(c, 0) + 1
+    total_repetitions = sum(count - 1 for count in counts.values() if count > 1)
+    pct = total_repetitions / len(mdp) * 100
+    bits = total_repetitions * 4  # estimation bits redondants
+    if pct < 10:
+        niveau = "Bien"
+    elif pct < 25:
+        niveau = "Moyen"
+    else:
+        niveau = "Faible"
+    return {"pct": round(pct, 2), "bits": bits, "niveau": niveau}
+
+# ---------------- Routes Flask ----------------
 @ApiUser.route('/')
 def index():
     return render_template('index.html')
@@ -49,6 +72,7 @@ def register():
     mdp_val = ""
     ent_value = ""
     niveau = ""
+    red = {}
     if request.method == 'POST':
         prenom_val = request.form.get('prenom', '')
         nom_val = request.form.get('nom', '')
@@ -61,12 +85,14 @@ def register():
             flash(message, 'warning')
         if mdp_val:
             ent_value, niveau = calculer_entropy(mdp_val)
+            red = calculer_redondance(mdp_val)
     return render_template('register.html',
                            prenom_val=prenom_val,
                            nom_val=nom_val,
                            mdp_val=mdp_val,
                            ent_value=ent_value,
-                           niveau=niveau)
+                           niveau=niveau,
+                           red=red)
 
 @ApiUser.route('/accueil')
 def accueil():
@@ -80,3 +106,25 @@ def logout():
     Authentification.logout()
     flash('Déconnecté avec succès.', 'info')
     return redirect(url_for('ApiUser.index'))
+
+# ---------------- Vérification mot de passe fuité ----------------
+@ApiUser.route('/check_pwned', methods=['POST'])
+def check_pwned():
+    data = request.get_json()
+    mdp = data.get("mdp", "")
+    if not mdp:
+        return jsonify({"error": "Mot de passe vide"}), 400
+
+    sha1 = hashlib.sha1(mdp.encode("utf-8")).hexdigest().upper()
+    prefix, suffix = sha1[:5], sha1[5:]
+    url = f"https://api.pwnedpasswords.com/range/{prefix}"
+    try:
+        res = requests.get(url)
+        if res.status_code != 200:
+            return jsonify({"error": "Impossible de vérifier le mot de passe"}), 500
+        hashes = (line.split(":") for line in res.text.splitlines())
+        if any(h == suffix for h, _ in hashes):
+            return jsonify({"pwned": True})
+        return jsonify({"pwned": False})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
