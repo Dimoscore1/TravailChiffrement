@@ -3,8 +3,8 @@ import hashlib
 import requests
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from back.Class.Authentification import Authentification
 
+from Entropy.back.Class import Authentification
 
 ApiUser = Blueprint("ApiUser", __name__)
 
