@@ -3,12 +3,14 @@ import hashlib
 import requests
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-
+from flask_restx import Api, Resource, fields
 from Class.Authentification import Authentification
+from Class.CConfig import db
 
+# ----------------- Blueprint site web -----------------
 ApiUser = Blueprint("ApiUser", __name__)
 
-# ---------------- Calcul de l'entropie ----------------
+# ----------------- Fonctions utilitaires -----------------
 def calculer_entropy(mdp):
     if not mdp:
         return None, None
@@ -32,7 +34,6 @@ def calculer_entropy(mdp):
         niveau = "Fort"
     return ent, niveau
 
-# ---------------- Calcul de la redondance ----------------
 def calculer_redondance(mdp):
     if not mdp:
         return {"pct": 0, "bits": 0, "niveau": "N/A"}
@@ -41,7 +42,7 @@ def calculer_redondance(mdp):
         counts[c] = counts.get(c, 0) + 1
     total_repetitions = sum(count - 1 for count in counts.values() if count > 1)
     pct = total_repetitions / len(mdp) * 100
-    bits = total_repetitions * 4  # estimation bits redondants
+    bits = total_repetitions * 4
     if pct < 10:
         niveau = "Bien"
     elif pct < 25:
@@ -50,7 +51,17 @@ def calculer_redondance(mdp):
         niveau = "Faible"
     return {"pct": round(pct, 2), "bits": bits, "niveau": niveau}
 
-# ---------------- Routes Flask ----------------
+def password_pwned(mdp):
+    sha1 = hashlib.sha1(mdp.encode("utf-8")).hexdigest().upper()
+    prefix, suffix = sha1[:5], sha1[5:]
+    url = f"https://api.pwnedpasswords.com/range/{prefix}"
+    res = requests.get(url)
+    if res.status_code != 200:
+        return False
+    hashes = (line.split(":") for line in res.text.splitlines())
+    return any(h == suffix for h, _ in hashes)
+
+# ----------------- Routes site web -----------------
 @ApiUser.route('/')
 def index():
     return render_template('index.html')
@@ -68,11 +79,8 @@ def login():
 
 @ApiUser.route('/register', methods=['GET', 'POST'])
 def register():
-    prenom_val = ""
-    nom_val = ""
-    mdp_val = ""
-    ent_value = ""
-    niveau = ""
+    prenom_val, nom_val, mdp_val = '', '', ''
+    ent_value, niveau = '', ''
     red = {}
     if request.method == 'POST':
         prenom_val = request.form.get('prenom', '')
@@ -108,24 +116,53 @@ def logout():
     flash('Déconnecté avec succès.', 'info')
     return redirect(url_for('ApiUser.index'))
 
-# ---------------- Vérification mot de passe fuité ----------------
 @ApiUser.route('/check_pwned', methods=['POST'])
 def check_pwned():
     data = request.get_json()
     mdp = data.get("mdp", "")
     if not mdp:
         return jsonify({"error": "Mot de passe vide"}), 400
-
-    sha1 = hashlib.sha1(mdp.encode("utf-8")).hexdigest().upper()
-    prefix, suffix = sha1[:5], sha1[5:]
-    url = f"https://api.pwnedpasswords.com/range/{prefix}"
     try:
-        res = requests.get(url)
-        if res.status_code != 200:
-            return jsonify({"error": "Impossible de vérifier le mot de passe"}), 500
-        hashes = (line.split(":") for line in res.text.splitlines())
-        if any(h == suffix for h, _ in hashes):
-            return jsonify({"pwned": True})
-        return jsonify({"pwned": False})
+        pwned = password_pwned(mdp)
+        return jsonify({"pwned": pwned})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# ----------------- Initialisation API Swagger -----------------
+def init_api(app, prefix='/Api'):
+    api = Api(app, version="1.0", title="API Entropy",
+              description="API de gestion des mots de passe et entropie",
+              doc=f"{prefix}/")
+
+    ns = api.namespace('entropy', description='Gestion utilisateurs et entropie')
+
+    password_model = api.model('Password', {'mdp': fields.String(required=True)})
+
+    @ns.route('/calculate_entropy')
+    class EntropyCalc(Resource):
+        @ns.expect(password_model)
+        def post(self):
+            data = api.payload
+            mdp = data.get('mdp', '')
+            ent, niveau = calculer_entropy(mdp)
+            return {'entropy': ent, 'niveau': niveau}
+
+    @ns.route('/calculate_redundancy')
+    class RedundancyCalc(Resource):
+        @ns.expect(password_model)
+        def post(self):
+            data = api.payload
+            mdp = data.get('mdp', '')
+            red = calculer_redondance(mdp)
+            return {'redondance': red}
+
+    @ns.route('/check_pwned')
+    class PwnedCheck(Resource):
+        @ns.expect(password_model)
+        def post(self):
+            data = api.payload
+            mdp = data.get('mdp', '')
+            pwned = password_pwned(mdp)
+            return {'pwned': pwned}
+
+    return api
