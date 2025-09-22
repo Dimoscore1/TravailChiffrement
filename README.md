@@ -8,6 +8,10 @@ Il s'agit d'un projet en Rust pour chiffrer et déchiffrer des textes avec deux 
 Le programme est interactif et demande à l’utilisateur de choisir le type de chiffrement, l’action (chiffrement ou déchiffrement), et la clé si nécessaire.
 
 ---
+# Entropy
+
+Il s'agit d'un site web permettant de calculer l'entropy et la redondance d'un mot de passe
+
 
 ## Prérequis
 
@@ -35,6 +39,11 @@ Le projet contient des tests pour :
 César (chiffrement et déchiffrement)
 Homophonic Substitution (réversible)
 cargo test
+
+2. Pour le projet Web  :
+https://travailchiffrement.onrender.com
+pour l'API
+https://travailchiffrement.onrender.com/Api
 
 
 
