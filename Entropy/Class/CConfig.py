@@ -23,5 +23,3 @@ class Config:
         self.app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('POSTGRES_SERVER')
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-        # Initialisation SQLAlchemy
-        db.init_app(self.app)
