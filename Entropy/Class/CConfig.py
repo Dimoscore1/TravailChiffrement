@@ -13,7 +13,7 @@ class Config:
         self.postgres_user = os.environ.get("POSTGRES_USER", "travailchiffrement_db_user")
         self.postgres_password = os.environ.get("POSTGRES_PASSWORD", "p284ieEyasdJXJcIos8Z49FaLacX9Daa")
         self.postgres_db = os.environ.get("POSTGRES_DB", "travailchiffrement_db")
-        self.postgres_port = os.environ.get("POSTGRES_PORT") or "5432"
+        self.postgres_port = int(os.environ.get("POSTGRES_PORT") or 5432)
 
         # Vérifications
         if not all([self.secret_key, self.postgres_server, self.postgres_user,
