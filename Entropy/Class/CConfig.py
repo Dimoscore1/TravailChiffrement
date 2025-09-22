@@ -2,22 +2,35 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-# Création de l'objet SQLAlchemy
+# Initialise SQLAlchemy sans app pour le moment
 db = SQLAlchemy()
+
 
 class Config:
     def __init__(self):
-        # Définition des chemins des dossiers templates et static
+        # Crée l'application Flask
         self.app = Flask(
             __name__,
-            template_folder=os.path.join(os.path.dirname(__file__), '../templates'),
-            static_folder=os.path.join(os.path.dirname(__file__), '../static')
+            template_folder=os.path.join(os.getcwd(), 'Entropy', 'templates'),
+            static_folder=os.path.join(os.getcwd(), 'Entropy', 'static')
         )
 
-        # Configuration de la base de données via variables d'environnement
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('POSTGRES_SERVER')
-        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        self.app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ma_cle_secrete_super_longue')
+        # Configuration Flask
+        self.app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ma_cle_secrete_par_defaut')
 
-        # Initialisation de SQLAlchemy avec l'app
+        # Récupération de l'URL complète de la base PostgreSQL
+        database_url = os.environ.get('POSTGRES_SERVER')
+
+        if not database_url:
+            raise ValueError("La variable d'environnement POSTGRES_SERVER n'est pas définie !")
+
+        # Configuration SQLAlchemy
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+        # Initialise SQLAlchemy avec l'app
         db.init_app(self.app)
+
+        # Crée les tables si elles n'existent pas
+        with self.app.app_context():
+            db.create_all()
