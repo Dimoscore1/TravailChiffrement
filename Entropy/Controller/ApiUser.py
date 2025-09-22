@@ -4,139 +4,118 @@ import requests
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_restx import Api, Resource, fields
-from Class.Authentification import Authentification
-from Class.CConfig import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
-# ----------------- Blueprint site web -----------------
+from Class.CConfig import db
+from Controller.Models import Entropy  # ton modèle SQLAlchemy
+
+# ---------------- Blueprint Flask ----------------
 ApiUser = Blueprint("ApiUser", __name__)
 
-# ----------------- Fonctions utilitaires -----------------
+# ---------------- Helpers ----------------
 def calculer_entropy(mdp):
     if not mdp:
-        return None, None
+        return 0, "N/A"
     pool = 0
-    if any(c.islower() for c in mdp):
-        pool += 26
-    if any(c.isupper() for c in mdp):
-        pool += 26
-    if any(c.isdigit() for c in mdp):
-        pool += 10
-    if any(c in "!@#$%^&*()-_=+[]{};:,.<>/?|\\`~" for c in mdp):
-        pool += 32
-    if pool == 0:
-        pool = 1
-    ent = int(math.log2(pool ** len(mdp)))
-    if ent < 28:
-        niveau = "Faible"
-    elif ent < 36:
-        niveau = "Moyen"
-    else:
-        niveau = "Fort"
+    if any(c.islower() for c in mdp): pool += 26
+    if any(c.isupper() for c in mdp): pool += 26
+    if any(c.isdigit() for c in mdp): pool += 10
+    if any(not c.isalnum() for c in mdp): pool += 32
+    ent = round(len(mdp) * math.log2(pool), 2) if pool > 0 else 0
+    if ent < 28: niveau = "Faible"
+    elif ent < 36: niveau = "Moyenne"
+    else: niveau = "Bonne"
     return ent, niveau
 
 def calculer_redondance(mdp):
     if not mdp:
         return {"pct": 0, "bits": 0, "niveau": "N/A"}
-    counts = {}
-    for c in mdp:
-        counts[c] = counts.get(c, 0) + 1
-    total_repetitions = sum(count - 1 for count in counts.values() if count > 1)
-    pct = total_repetitions / len(mdp) * 100
-    bits = total_repetitions * 4
-    if pct < 10:
-        niveau = "Bien"
-    elif pct < 25:
-        niveau = "Moyen"
-    else:
-        niveau = "Faible"
-    return {"pct": round(pct, 2), "bits": bits, "niveau": niveau}
+    import collections
+    freqs = collections.Counter(mdp)
+    n = len(mdp)
+    Hmax = math.log2(len(set(mdp)))
+    H = -sum((count/n) * math.log2(count/n) for count in freqs.values())
+    red = round(100*(1 - H/Hmax), 2) if Hmax > 0 else 0
+    niveau = "Bonne" if red < 30 else "Moyenne" if red < 50 else "Faible"
+    return {"pct": red, "niveau": niveau}
 
 def password_pwned(mdp):
-    sha1 = hashlib.sha1(mdp.encode("utf-8")).hexdigest().upper()
+    sha1 = hashlib.sha1(mdp.encode('utf-8')).hexdigest().upper()
     prefix, suffix = sha1[:5], sha1[5:]
     url = f"https://api.pwnedpasswords.com/range/{prefix}"
     res = requests.get(url)
     if res.status_code != 200:
         return False
-    hashes = (line.split(":") for line in res.text.splitlines())
-    return any(h == suffix for h, _ in hashes)
+    hashes = (line.split(':') for line in res.text.splitlines())
+    return any(h == suffix for h, count in hashes)
 
-# ----------------- Routes site web -----------------
+# ---------------- Routes Web Flask ----------------
 @ApiUser.route('/')
 def index():
     return render_template('index.html')
 
 @ApiUser.route('/login', methods=['GET', 'POST'])
-def login():
+def login_page():
     if request.method == 'POST':
         prenom = request.form.get('prenom', '')
         mdp = request.form.get('mdp', '')
-        success, message = Authentification.login(prenom, mdp)
-        if success:
+        user = Entropy.query.filter_by(prenom=prenom).first()
+        if user and check_password_hash(user.mdpHache, mdp):
+            session['user_id'] = user.id
+            flash("Connexion réussie.", "success")
             return redirect(url_for('ApiUser.accueil'))
-        flash(message, 'danger')
+        flash("Identifiants invalides.", "danger")
     return render_template('login.html')
 
 @ApiUser.route('/register', methods=['GET', 'POST'])
-def register():
-    prenom_val, nom_val, mdp_val = '', '', ''
-    ent_value, niveau = '', ''
-    red = {}
+def register_page():
     if request.method == 'POST':
-        prenom_val = request.form.get('prenom', '')
-        nom_val = request.form.get('nom', '')
-        mdp_val = request.form.get('mdp', '')
-        success, message = Authentification.register(prenom_val, nom_val, mdp_val, calculer_entropy)
-        if success:
-            flash(message, 'success')
-            return redirect(url_for('ApiUser.login'))
-        else:
-            flash(message, 'warning')
-        if mdp_val:
-            ent_value, niveau = calculer_entropy(mdp_val)
-            red = calculer_redondance(mdp_val)
-    return render_template('register.html',
-                           prenom_val=prenom_val,
-                           nom_val=nom_val,
-                           mdp_val=mdp_val,
-                           ent_value=ent_value,
-                           niveau=niveau,
-                           red=red)
+        prenom = request.form.get('prenom', '')
+        nom = request.form.get('nom', '')
+        mdp = request.form.get('mdp', '')
+        if Entropy.query.filter_by(prenom=prenom).first():
+            flash("Ce prénom est déjà utilisé.", "warning")
+            return redirect(url_for('ApiUser.register_page'))
+        hashed = generate_password_hash(mdp, method='scrypt')
+        ent_val, niveau = calculer_entropy(mdp)
+        new_user = Entropy(prenom=prenom, nom=nom, mdpHache=hashed, entropy=ent_val)
+        db.session.add(new_user)
+        db.session.commit()
+        flash("Inscription réussie.", "success")
+        return redirect(url_for('ApiUser.login_page'))
+    return render_template('register.html')
 
 @ApiUser.route('/accueil')
 def accueil():
     if 'user_id' not in session:
-        flash("Vous devez être connecté pour accéder à cette page.", "warning")
-        return redirect(url_for('ApiUser.login'))
+        flash("Vous devez être connecté.", "warning")
+        return redirect(url_for('ApiUser.login_page'))
     return render_template('accueil.html')
 
 @ApiUser.route('/logout')
 def logout():
-    Authentification.logout()
-    flash('Déconnecté avec succès.', 'info')
+    session.pop('user_id', None)
+    flash("Déconnecté.", "info")
     return redirect(url_for('ApiUser.index'))
 
-@ApiUser.route('/check_pwned', methods=['POST'])
-def check_pwned():
-    data = request.get_json()
-    mdp = data.get("mdp", "")
-    if not mdp:
-        return jsonify({"error": "Mot de passe vide"}), 400
-    try:
-        pwned = password_pwned(mdp)
-        return jsonify({"pwned": pwned})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ----------------- Initialisation API Swagger -----------------
+# ---------------- Routes API Swagger ----------------
 def init_api(app, prefix='/Api'):
     api = Api(app, version="1.0", title="API Entropy",
               description="API de gestion des mots de passe et entropie",
-              doc=f"{prefix}/")
+              doc=f"{prefix}/")  # Swagger UI
 
     ns = api.namespace('entropy', description='Gestion utilisateurs et entropie')
 
     password_model = api.model('Password', {'mdp': fields.String(required=True)})
+    register_model = api.model('Register', {
+        'prenom': fields.String(required=True),
+        'nom': fields.String(required=True),
+        'mdp': fields.String(required=True)
+    })
+    login_model = api.model('Login', {
+        'prenom': fields.String(required=True),
+        'mdp': fields.String(required=True)
+    })
 
     @ns.route('/calculate_entropy')
     class EntropyCalc(Resource):
@@ -145,7 +124,7 @@ def init_api(app, prefix='/Api'):
             data = api.payload
             mdp = data.get('mdp', '')
             ent, niveau = calculer_entropy(mdp)
-            return {'entropy': ent, 'niveau': niveau}
+            return {"entropy": ent, "niveau": niveau}
 
     @ns.route('/calculate_redundancy')
     class RedundancyCalc(Resource):
@@ -153,8 +132,7 @@ def init_api(app, prefix='/Api'):
         def post(self):
             data = api.payload
             mdp = data.get('mdp', '')
-            red = calculer_redondance(mdp)
-            return {'redondance': red}
+            return calculer_redondance(mdp)
 
     @ns.route('/check_pwned')
     class PwnedCheck(Resource):
@@ -162,7 +140,32 @@ def init_api(app, prefix='/Api'):
         def post(self):
             data = api.payload
             mdp = data.get('mdp', '')
-            pwned = password_pwned(mdp)
-            return {'pwned': pwned}
+            return {"pwned": password_pwned(mdp)}
+
+    @ns.route('/register')
+    class Register(Resource):
+        @ns.expect(register_model)
+        def post(self):
+            data = api.payload
+            prenom, nom, mdp = data['prenom'], data['nom'], data['mdp']
+            if Entropy.query.filter_by(prenom=prenom).first():
+                return {'message': 'Ce prénom est déjà utilisé.'}, 400
+            hashed = generate_password_hash(mdp, method='scrypt')
+            ent_val, _ = calculer_entropy(mdp)
+            user = Entropy(prenom=prenom, nom=nom, mdpHache=hashed, entropy=ent_val)
+            db.session.add(user)
+            db.session.commit()
+            return {"message": "Inscription réussie", "entropy": ent_val}
+
+    @ns.route('/login')
+    class Login(Resource):
+        @ns.expect(login_model)
+        def post(self):
+            data = api.payload
+            prenom, mdp = data['prenom'], data['mdp']
+            user = Entropy.query.filter_by(prenom=prenom).first()
+            if user and check_password_hash(user.mdpHache, mdp):
+                return {"message": "Connexion réussie", "prenom": user.prenom, "nom": user.nom}
+            return {"message": "Identifiants invalides"}, 401
 
     return api
