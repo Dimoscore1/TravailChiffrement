@@ -8,11 +8,11 @@ db = SQLAlchemy()
 class Config:
     def __init__(self):
         # Récupération des variables d'environnement
-        self.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
-        self.postgres_server = os.environ.get("POSTGRES_SERVER", "localhost")
-        self.postgres_user = os.environ.get("POSTGRES_USER", "postgres")
-        self.postgres_password = os.environ.get("POSTGRES_PASSWORD", "password")
-        self.postgres_db = os.environ.get("POSTGRES_DB", "entropydb")
+        self.secret_key = os.environ.get("SECRET_KEY", "ma_cle_secrete_super_longue")
+        self.postgres_server = os.environ.get("POSTGRES_SERVER", "postgresql://travailchiffrement_db_user:p284ieEyasdJXJcIos8Z49FaLacX9Daa@dpg-d38rjb1r0fns7387ofq0-a/travailchiffrement_db")
+        self.postgres_user = os.environ.get("POSTGRES_USER", "travailchiffrement_db_user")
+        self.postgres_password = os.environ.get("POSTGRES_PASSWORD", "p284ieEyasdJXJcIos8Z49FaLacX9Daa")
+        self.postgres_db = os.environ.get("POSTGRES_DB", "travailchiffrement_db")
         self.postgres_port = os.environ.get("POSTGRES_PORT", "5432")
 
         # Vérifications
