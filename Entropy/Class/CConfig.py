@@ -7,12 +7,12 @@ db = SQLAlchemy()
 class Config:
     def __init__(self):
         # Variables d'environnement
-        self.secret_key = os.environ.get("SECRET_KEY")  # valeur par défaut si pas définie
+        self.secret_key = os.environ.get("SECRET_KEY", "changeme")  # valeur par défaut si pas définie
         self.postgres_server = os.environ.get("POSTGRES_SERVER")
         self.postgres_user = os.environ.get("POSTGRES_USER")
         self.postgres_password = os.environ.get("POSTGRES_PASSWORD")
         self.postgres_db = os.environ.get("POSTGRES_DB")
-        self.postgres_port = os.environ.get("POSTGRES_PORT")  # chaîne par défaut
+        self.postgres_port = os.environ.get("POSTGRES_PORT", "5432")  # chaîne par défaut
 
         # Vérifier qu'aucune variable critique n'est vide
         for var_name in ["POSTGRES_SERVER", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]:
