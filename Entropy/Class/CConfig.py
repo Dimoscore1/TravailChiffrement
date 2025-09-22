@@ -1,7 +1,6 @@
 ﻿import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from win32comext.shell.demos.viewstate import template_folder
 
 # Instance SQLAlchemy globale
 db = SQLAlchemy()
