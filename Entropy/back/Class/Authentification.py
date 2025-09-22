@@ -1,7 +1,10 @@
 ﻿from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
-from back.Model.Entropy import Entropy
-from back.Class.CConfig import db
+
+from Entropy.back import db
+from Entropy.back.Model import Entropy
+
+
 class Authentification:
 
     @staticmethod
