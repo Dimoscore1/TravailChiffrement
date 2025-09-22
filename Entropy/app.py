@@ -1,41 +1,19 @@
-﻿import os
-from flask import Flask, render_template
-from flask_sqlalchemy import SQLAlchemy
-from Controller.ApiUser import init_api  # ton code API
+﻿from flask import Flask
+from Class.CConfig import db, Config
+from Controller.ApiUser import ApiUser, init_api
 
-db = SQLAlchemy()
-
-class Config:
-    def __init__(self):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        template_dir = os.path.join(base_dir, 'templates')
-        static_dir = os.path.join(base_dir, 'static')
-
-        self.app = Flask(
-            __name__,
-            template_folder=template_dir,
-            static_folder=static_dir
-        )
-
-        self.app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ma_cle_secrete')
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('POSTGRES_SERVER')
-        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-        db.init_app(self.app)
-
-# Initialisation
+# Instanciation de l'application Flask avec chemins absolus pour templates et static
 config = Config()
-app = config.app
+app = config.app  # Contient template_folder et static_folder configurés
 
-# API Swagger sur /Api/
+# Enregistrer le Blueprint site web (login, register, accueil)
+app.register_blueprint(ApiUser, url_prefix='')  # accessible sur /
+
+# Initialiser Swagger API sur /Api
 api = init_api(app, prefix='/Api')
 
-# ---------------- Routes Web ----------------
-@app.route('/')
-def index():
-    return render_template('index.html')
+# Initialiser SQLAlchemy (déjà fait dans Config)
+db.init_app(app)
 
-# ---------------- Run ----------------
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
