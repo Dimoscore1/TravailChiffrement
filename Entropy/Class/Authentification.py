@@ -1,7 +1,8 @@
-﻿from werkzeug.security import generate_password_hash, check_password_hash
+﻿from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 
-from Entropy import db
+from Entropy.Class.CConfig import db
 from Entropy.Model import Entropy
 
 
