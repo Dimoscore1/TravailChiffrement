@@ -6,9 +6,17 @@ db = SQLAlchemy()
 
 class Config:
     def __init__(self):
-        # Définir le dossier templates correctement
-        template_dir = os.path.join(os.path.dirname(__file__), '..', 'templates')
-        self.app = Flask(__name__, template_folder=template_dir)
+        # Dossiers absolus pour templates et static
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        template_dir = os.path.join(base_dir, '..', 'templates')
+        static_dir = os.path.join(base_dir, '..', 'static')
+
+        # Crée l'app Flask avec templates et static
+        self.app = Flask(
+            __name__,
+            template_folder=template_dir,
+            static_folder=static_dir
+        )
 
         # Configuration Flask
         self.app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ma_cle_secrete')
