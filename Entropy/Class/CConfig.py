@@ -6,12 +6,13 @@ db = SQLAlchemy()
 
 class Config:
     def __init__(self):
-        # Crée l'application Flask
-        self.app = Flask(__name__, template_folder="Entropy/templates", static_folder="Entropy/static")
+        # Définir le dossier templates correctement
+        template_dir = os.path.join(os.path.dirname(__file__), '..', 'templates')
+        self.app = Flask(__name__, template_folder=template_dir)
 
         # Configuration Flask
-        self.app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "une_cle_par_defaut")
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("POSTGRES_SERVER")
+        self.app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ma_cle_secrete')
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('POSTGRES_SERVER')
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
         # Initialisation SQLAlchemy
