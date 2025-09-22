@@ -4,7 +4,7 @@ import requests
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 
-from Entropy.Class import Authentification
+from Class.Authentification import Authentification
 
 ApiUser = Blueprint("ApiUser", __name__)
 
