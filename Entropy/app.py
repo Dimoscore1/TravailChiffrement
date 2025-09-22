@@ -3,9 +3,10 @@ from Class.CConfig import Config, db
 from Controller.ApiUser import ApiUser
 from Model import EntropyModel  # obligatoire pour que SQLAlchemy connaisse les modèles
 
-# Crée l’app Flask via Config
-config = Config(template_folder='Entropy/templates')
+# Création de l’app Flask via Config
+config = Config()
 app = config.app
+
 # Création des tables au démarrage
 with app.app_context():
     db.create_all()
