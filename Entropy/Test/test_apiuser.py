@@ -4,7 +4,7 @@ import pytest
 
 from Entropy import db
 from Entropy.Class.CConfig import Config
-from Entropy.Model import Entropy
+from Entropy.Model import EntropyModel
 
 # Ajoute le dossier parent au PYTHONPATH pour que Python trouve "back"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))

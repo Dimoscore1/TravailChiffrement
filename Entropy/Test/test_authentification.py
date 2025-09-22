@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash
 
 from Entropy import db
 from Entropy.Class import Authentification
-from Entropy.Model import Entropy
+from Entropy.Model import EntropyModel
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
