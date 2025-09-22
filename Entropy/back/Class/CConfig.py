@@ -1,5 +1,4 @@
 ﻿import os
-import yaml
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -7,44 +6,28 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class Config:
-    def __init__(self, config_file=None):
-        if config_file is None:
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            config_file = os.path.join(base_dir, 'Config', 'config.yaml')
-            config_file = os.path.abspath(config_file)
+    def __init__(self):
+        # Récupération des variables d'environnement
+        self.secret_key = os.environ.get("SECRET_KEY")
+        self.postgres_server = os.environ.get("POSTGRES_SERVER")
+        self.postgres_user = os.environ.get("POSTGRES_USER")
+        self.postgres_password = os.environ.get("POSTGRES_PASSWORD")
+        self.postgres_db = os.environ.get("POSTGRES_DB")
+        self.postgres_port = os.environ.get("POSTGRES_PORT", "5432")  # valeur par défaut 5432
 
-        print("Chemin absolu recherché :", config_file)
-        if not os.path.exists(config_file):
-            raise FileNotFoundError(f"Le fichier config.yaml est introuvable : {config_file}")
+        # Vérifications
+        if not all([self.secret_key, self.postgres_server, self.postgres_user,
+                    self.postgres_password, self.postgres_db]):
+            raise RuntimeError("Certaines variables d'environnement ne sont pas définies !")
 
-        # Lecture YAML
-        with open(config_file, "r", encoding="utf-8") as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
-
-        # Clé secrète
-        self.secret_key = config.get("secret_key", "").strip()
-        if not self.secret_key:
-            raise RuntimeError("La clé secrète n'a pas été définie correctement !")
-
-        # Config PostgreSQL
-        postgres = config.get("databases", {}).get("Postgres")
-        if not postgres:
-            raise ValueError("Section databases.Postgres manquante dans config.yaml")
-
-        self.PostgresServer = postgres.get("server")
-        self.PostgresUsername = postgres.get("username")
-        self.PostgresPassword = postgres.get("password")
-        self.PostgresDatabase = postgres.get("database")
-        self.PostgresPort = postgres.get("port")
-
-        # Templates et static
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        # Création de l'app Flask
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         template_dir = os.path.join(project_root, 'Templates')
         static_dir = os.path.join(project_root, 'static')
+
         print("Dossier templates :", template_dir)
         print("Dossier static :", static_dir)
 
-        # Création de l'app Flask
         self.app = Flask(
             __name__,
             template_folder=template_dir,
@@ -54,8 +37,8 @@ class Config:
 
         # Config SQLAlchemy
         self.app.config['SQLALCHEMY_DATABASE_URI'] = (
-            f"postgresql://{self.PostgresUsername}:{self.PostgresPassword}"
-            f"@{self.PostgresServer}:{self.PostgresPort}/{self.PostgresDatabase}"
+            f"postgresql://{self.postgres_user}:{self.postgres_password}"
+            f"@{self.postgres_server}:{self.postgres_port}/{self.postgres_db}"
         )
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
