@@ -2,6 +2,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
+db = SQLAlchemy()
 
 class Config:
     def __init__(self):
