@@ -7,7 +7,7 @@ from flask_restx import Api, Resource, fields
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from Class.CConfig import db
-from Model import Entropy  # ton modèle SQLAlchemy
+from Model import EntropyModel  # ton modèle SQLAlchemy
 
 # ---------------- Blueprint Flask ----------------
 ApiUser = Blueprint("ApiUser", __name__)
