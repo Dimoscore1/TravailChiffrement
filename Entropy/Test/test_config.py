@@ -2,8 +2,10 @@
 import tempfile
 import pytest
 import yaml
-from back.Class.CConfig import Config, db
 from flask import Flask
+
+from Entropy.Class.CConfig import Config
+
 
 @pytest.fixture
 def temp_config_file():

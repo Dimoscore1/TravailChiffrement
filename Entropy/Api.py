@@ -4,7 +4,7 @@ import math
 import hashlib
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
-from back.Class.CConfig import db
+from Class.CConfig import db
 
 # SQLAlchemy Model
 class Entropy(db.Model):

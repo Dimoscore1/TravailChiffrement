@@ -1,5 +1,5 @@
-﻿from back.Class.CConfig import Config
-from back.Controller.ApiUser import ApiUser
+﻿from Class.CConfig import Config
+from Controller.ApiUser import ApiUser
 from Api import init_api  # ton API Swagger
 from threading import Thread
 

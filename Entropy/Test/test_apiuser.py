@@ -2,12 +2,13 @@
 import os
 import pytest
 
+from Entropy import db
+from Entropy.Class.CConfig import Config
+from Entropy.Model import Entropy
+
 # Ajoute le dossier parent au PYTHONPATH pour que Python trouve "back"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from back.Controller.ApiUser import ApiUser
-from back.Class.CConfig import Config, db
-from back.Model.Entropy import Entropy
 from werkzeug.security import generate_password_hash
 
 

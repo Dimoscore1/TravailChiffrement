@@ -3,11 +3,13 @@ import sys
 import os
 from flask import Flask, session
 from werkzeug.security import generate_password_hash
+
+from Entropy import db
+from Entropy.Class import Authentification
+from Entropy.Model import Entropy
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from back.Class.Authentification import Authentification
-from back.Class.CConfig import db
-from back.Model.Entropy import Entropy
 
 
 @pytest.fixture
