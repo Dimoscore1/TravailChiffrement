@@ -5,8 +5,7 @@ from Model import EntropyModel  # obligatoire pour que SQLAlchemy connaisse les 
 
 # Crée l’app Flask via Config
 config = Config()
-app = config.get_app()
-
+app = config.app
 # Création des tables au démarrage
 with app.app_context():
     db.create_all()
