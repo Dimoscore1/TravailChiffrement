@@ -1,6 +1,7 @@
 ﻿import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from win32comext.shell.demos.viewstate import template_folder
 
 # Instance SQLAlchemy globale
 db = SQLAlchemy()
@@ -28,11 +29,8 @@ class Config:
         print("Dossier templates :", template_dir)
         print("Dossier static :", static_dir)
 
-        self.app = Flask(
-            __name__,
-            template_folder=template_dir,
-            static_folder=static_dir
-        )
+        self.app = Flask(__name__, template_folder=template_folder, static_folder='Entropy/static')
+
         self.app.secret_key = self.secret_key
 
         # Config SQLAlchemy
