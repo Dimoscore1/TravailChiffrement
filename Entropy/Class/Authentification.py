@@ -2,8 +2,8 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 
-from Entropy.Class.CConfig import db
-from Entropy.Model import Entropy
+from Class.CConfig import db
+from Model import Entropy
 
 
 class Authentification:
