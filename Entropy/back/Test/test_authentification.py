@@ -37,13 +37,13 @@ def test_register_success(app):
         return (3.5, "ok")
 
     with app.app_context():
-        ok, msg = Authentification.register("Alice", "Dupont", "password123", fake_entropy)
+        ok, msg = Authentification.register("Vico", "Gascon", "mdp123", fake_entropy)
 
         assert ok is True
         assert msg == "Inscription réussie !"
         user = Entropy.query.filter_by(prenom="Alice").first()
         assert user is not None
-        assert user.nom == "Dupont"
+        assert user.nom == "Gascon"
         assert user.entropy == 3.5
 
 

@@ -13,13 +13,12 @@ from werkzeug.security import generate_password_hash
 
 @pytest.fixture
 def app():
-    """Crée une app Flask de test avec SQLite en mémoire."""
+    """ On crée une app Flask de test avec SQLite en mémoire."""
     config = Config()
     app = config.app
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     app.config["TESTING"] = True
 
-    # Pas besoin de db.init_app(app), déjà fait dans Config
     app.register_blueprint(ApiUser)
 
     with app.app_context():
@@ -43,19 +42,19 @@ def test_register_and_login(client, app):
     with app.app_context():
         # Test register
         response = client.post('/register', data={
-            'prenom': 'Alice',
-            'nom': 'Dupont',
-            'mdp': 'password123'
+            'prenom': 'Vico',
+            'nom': 'Gascon',
+            'mdp': 'mdp123'
         }, follow_redirects=True)
 
         # Vérifie que l'utilisateur a été créé
-        user = Entropy.query.filter_by(prenom='Alice').first()
+        user = Entropy.query.filter_by(prenom='Vico').first()
         assert user is not None
 
         # Test login
         response = client.post('/login', data={
-            'prenom': 'Alice',
-            'mdp': 'password123'
+            'prenom': 'Vico',
+            'mdp': 'mdp123'
         }, follow_redirects=True)
 
         # Vérifie que user_id est bien dans la session
@@ -65,8 +64,8 @@ def test_register_and_login(client, app):
 
 def test_login_invalid(client):
     response = client.post('/login', data={
-        'prenom': 'Inconnu',
-        'mdp': 'wrong'
+        'prenom': 'Mathieu',
+        'mdp': 'Minecraft85'
     }, follow_redirects=True)
 
     data_str = response.data.decode('utf-8')
