@@ -5,6 +5,7 @@ import requests
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from back.Class.Authentification import Authentification
 
+
 ApiUser = Blueprint("ApiUser", __name__)
 
 # ---------------- Calcul de l'entropie ----------------

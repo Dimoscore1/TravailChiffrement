@@ -2,7 +2,7 @@
 from flask import session
 
 from back.Class.CConfig import Config, db
-from back.Model import Entropy
+from back.Model.Entropy import Entropy
 
 
 class Authentification:
