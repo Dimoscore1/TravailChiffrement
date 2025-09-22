@@ -1,25 +1,41 @@
 ﻿import os
-from Class.CConfig import Config, db
-from Controller.ApiUser import ApiUser
-from Model import EntropyModel  # pour que SQLAlchemy connaisse les modèles
+from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
+from Controller.ApiUser import init_api  # ton code API
 
-# Crée l’app Flask via Config
-config = Config()  # c'est une instance
+db = SQLAlchemy()
+
+class Config:
+    def __init__(self):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        template_dir = os.path.join(base_dir, 'templates')
+        static_dir = os.path.join(base_dir, 'static')
+
+        self.app = Flask(
+            __name__,
+            template_folder=template_dir,
+            static_folder=static_dir
+        )
+
+        self.app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ma_cle_secrete')
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('POSTGRES_SERVER')
+        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+        db.init_app(self.app)
+
+# Initialisation
+config = Config()
 app = config.app
 
-# Pas besoin de réaffecter SQLALCHEMY_DATABASE_URI ici, il est déjà dans config.app
+# API Swagger sur /Api/
+api = init_api(app, prefix='/Api')
 
-# Création des tables au démarrage
-with app.app_context():
-    db.create_all()
+# ---------------- Routes Web ----------------
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-# Enregistrement du blueprint
-app.register_blueprint(ApiUser)
-
-@app.route("/health")
-def health():
-    return "OK"
-
+# ---------------- Run ----------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
