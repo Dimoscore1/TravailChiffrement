@@ -1,4 +1,5 @@
-﻿import db
+﻿from .app import db
+
 
 class Entropy(db.Model):
     __tablename__ = "users"
