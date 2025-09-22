@@ -1,4 +1,4 @@
-﻿from .app import db
+﻿from Class.CConfig import db
 
 
 class Entropy(db.Model):
