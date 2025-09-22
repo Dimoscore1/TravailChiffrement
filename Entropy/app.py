@@ -2,17 +2,16 @@
 from Class.CConfig import db, Config
 from Controller.ApiUser import ApiUser, init_api
 
-# Instanciation de l'application Flask avec chemins absolus pour templates et static
 config = Config()
-app = config.app  # Contient template_folder et static_folder configurés
+app = config.app  # Flask avec templates et static configurés
 
-# Enregistrer le Blueprint site web (login, register, accueil)
-app.register_blueprint(ApiUser, url_prefix='')  # accessible sur /
+# Enregistrer le Blueprint site web
+app.register_blueprint(ApiUser, url_prefix='')
 
-# Initialiser Swagger API sur /Api
+# Initialiser Swagger API
 api = init_api(app, prefix='/Api')
 
-# Initialiser SQLAlchemy (déjà fait dans Config)
+# ⚠️ Initialiser db UNE seule fois
 db.init_app(app)
 
 if __name__ == "__main__":
