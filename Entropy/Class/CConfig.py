@@ -1,36 +1,25 @@
 ﻿import os
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-# Initialise SQLAlchemy sans app pour le moment
 db = SQLAlchemy()
 
-
 class Config:
-    def __init__(self):
-        # Crée l'application Flask
-        self.app = Flask(
-            __name__,
-            template_folder=os.path.join(os.getcwd(), 'Entropy', 'templates'),
-            static_folder=os.path.join(os.getcwd(), 'Entropy', 'static')
-        )
+    """
+    Configuration Flask et SQLAlchemy
+    """
+    # Lecture des variables d'environnement Render
+    POSTGRES_USER = os.environ.get("POSTGRES_USER", "user")
+    POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "password")
+    POSTGRES_DB = os.environ.get("POSTGRES_DB", "db")
+    POSTGRES_SERVER = os.environ.get("POSTGRES_SERVER", "localhost")
+    POSTGRES_PORT = os.environ.get("POSTGRES_PORT", "5432")
 
-        # Configuration Flask
-        self.app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ma_cle_secrete_par_defaut')
+    SECRET_KEY = os.environ.get("SECRET_KEY", "ma_cle_secrete_par_defaut")
 
-        # Récupération de l'URL complète de la base PostgreSQL
-        database_url = os.environ.get('POSTGRES_SERVER')
+    # Construction de l'URI SQLAlchemy correctement
+    SQLALCHEMY_DATABASE_URI = (
+        f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
+        f"@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    )
 
-        if not database_url:
-            raise ValueError("La variable d'environnement POSTGRES_SERVER n'est pas définie !")
-
-        # Configuration SQLAlchemy
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-        # Initialise SQLAlchemy avec l'app
-        db.init_app(self.app)
-
-        # Crée les tables si elles n'existent pas
-        with self.app.app_context():
-            db.create_all()
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
