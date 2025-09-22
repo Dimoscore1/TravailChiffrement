@@ -11,7 +11,6 @@ app.register_blueprint(ApiUser, url_prefix='')
 # Initialiser Swagger API
 api = init_api(app, prefix='/Api')
 
-# ⚠️ Initialiser db UNE seule fois
 db.init_app(app)
 
 if __name__ == "__main__":
