@@ -2,8 +2,7 @@
 import os
 import pytest
 
-from Entropy import db
-from Entropy.Class.CConfig import Config
+from Entropy.Class.CConfig import Config, db
 from Entropy.Model import EntropyModel
 
 # Ajoute le dossier parent au PYTHONPATH pour que Python trouve "back"

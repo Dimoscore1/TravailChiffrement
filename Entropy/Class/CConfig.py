@@ -2,18 +2,18 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-# Instance SQLAlchemy globale
+# Instance SQLAlchemy globale (à importer partout)
 db = SQLAlchemy()
 
 class Config:
     def __init__(self):
         # Récupération des variables d'environnement
-        self.secret_key = os.environ.get("SECRET_KEY")
-        self.postgres_server = os.environ.get("POSTGRES_SERVER")
-        self.postgres_user = os.environ.get("POSTGRES_USER")
-        self.postgres_password = os.environ.get("POSTGRES_PASSWORD")
-        self.postgres_db = os.environ.get("POSTGRES_DB")
-        self.postgres_port = os.environ.get("POSTGRES_PORT", "5432")  # valeur par défaut 5432
+        self.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
+        self.postgres_server = os.environ.get("POSTGRES_SERVER", "localhost")
+        self.postgres_user = os.environ.get("POSTGRES_USER", "postgres")
+        self.postgres_password = os.environ.get("POSTGRES_PASSWORD", "password")
+        self.postgres_db = os.environ.get("POSTGRES_DB", "entropydb")
+        self.postgres_port = os.environ.get("POSTGRES_PORT", "5432")
 
         # Vérifications
         if not all([self.secret_key, self.postgres_server, self.postgres_user,
@@ -22,7 +22,7 @@ class Config:
 
         # Création de l'app Flask
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        template_dir = os.path.join(project_root, 'Templates')
+        template_dir = os.path.join(project_root, 'templates')
         static_dir = os.path.join(project_root, 'static')
 
         print("Dossier templates :", template_dir)
@@ -44,3 +44,6 @@ class Config:
 
         # Init db avec l'app
         db.init_app(self.app)
+
+    def get_app(self):
+        return self.app
