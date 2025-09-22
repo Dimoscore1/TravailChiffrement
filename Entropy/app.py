@@ -12,14 +12,13 @@ app = conf.app
 
 # Enregistrement du blueprint web
 app.register_blueprint(ApiUser)
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def create_app():
-    app = Flask(
-        __name__,
-        template_folder=os.path.join(BASE_DIR, "templates"),
-        static_folder=os.path.join(BASE_DIR, "static")
-    )
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static")
+)
 # Initialisation de l'API Swagger sur le même app mais sous /Api
 api = init_api(app, prefix='/Api')  # on passe le préfixe pour Swagger
 
